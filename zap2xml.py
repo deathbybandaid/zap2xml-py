@@ -20,6 +20,7 @@ windows.
 Written to have only standard library dependencies.
 """
 
+import os
 import argparse
 import datetime
 import json
@@ -29,7 +30,6 @@ import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
-
 
 def get_args():
   parser = argparse.ArgumentParser(
@@ -74,21 +74,20 @@ def get_args():
       help='The zip/postal code identifying the listings to fetch.')
   return parser.parse_args()
 
-
 def get_cached(cache_dir, cache_key, delay, url):
   cache_path = cache_dir.joinpath(cache_key)
   if cache_path.is_file():
-    print('FROM CACHE:', url)
+    #print('FROM CACHE:', url)
     with open(cache_path, 'rb') as f:
       return f.read()
   else:
-    print('Fetching:  ', url)
+    #print('Fetching:  ', url)
     try:
       resp = urllib.request.urlopen(url)
       result = resp.read()
     except urllib.error.HTTPError as e:
       if e.code == 400:
-        print('Got a 400 error!  Ignoring it.')
+        #print('Got a 400 error!  Ignoring it.')
         result = (
             b'{'
             b'"note": "Got a 400 error at this time, skipping.",'
@@ -109,7 +108,7 @@ def remove_stale_cache(cache_dir, zap_time):
       if t >= zap_time: continue
     except:
       pass
-    print('Removing stale cache file:', p.name)
+    #print('Removing stale cache file:', p.name)
     p.unlink()
 
 
@@ -117,28 +116,34 @@ def tm_parse(tm):
   tm = tm.replace('Z', '+00:00')
   return datetime.datetime.fromisoformat(tm)
 
-
 def sub_el(parent, name, text=None, **kwargs):
   el = ET.SubElement(parent, name, **kwargs)
   if text: el.text = text
   return el
 
-
 def main():
-  cache_dir = pathlib.Path(__file__).parent.joinpath('cache')
-  if not cache_dir.is_dir():
-    cache_dir.mkdir()
 
   args = get_args()
   base_qs = {k[4:]: v for (k, v) in vars(args).items() if k.startswith('zap_')}
+
+  print("Processing " + str(base_qs["postalCode"]))
+
+  base_cache_dir = pathlib.Path(__file__).parent.joinpath('cache')
+  if not base_cache_dir.is_dir():
+    base_cache_dir.mkdir()
+
+  cache_dir = pathlib.Path(base_cache_dir).joinpath(str(base_qs["postalCode"]))
+  if not cache_dir.is_dir():
+    cache_dir.mkdir()
+
   done_channels = False
   err = 0
   # Start time parameter is now rounded down to nearest `zap_timespan`, in s.
   zap_time = time.mktime(time.localtime())
-  print('Local time:    ', zap_time)
+  #print('Local time:    ', zap_time)
   zap_time_window = args.zap_timespan * 3600
   zap_time = int(zap_time - (zap_time % zap_time_window))
-  print('First zap time:', zap_time)
+  #print('First zap time:', zap_time)
 
   remove_stale_cache(cache_dir, zap_time)
 
@@ -152,7 +157,7 @@ def main():
   for i in range(int(7 * 24 / args.zap_timespan)):
     i_time = zap_time + (i * zap_time_window)
     i_dt = datetime.datetime.fromtimestamp(i_time)
-    print('Getting data for', i_dt.isoformat())
+    #print('Getting data for', i_dt.isoformat())
 
     qs = base_qs.copy()
     qs['lineupId'] = '%s-%s-DEFAULT' % (args.zap_country, args.zap_headendId)
@@ -172,11 +177,14 @@ def main():
             text='%s %s' % (c_in['channelNo'], c_in['callSign']))
         sub_el(c_out, 'display-name', text=c_in['channelNo'])
         sub_el(c_out, 'display-name', text=c_in['callSign'])
+        channel_thumb = str(c_in['thumbnail']).replace("//", "")
+        sub_el(c_out, 'icon', src=channel_thumb)
 
     for c in d['channels']:
       c_id = 'I%s.%s.zap2it.com' % (c['channelNo'], c['channelId'])
       for event in c['events']:
         prog_in = event['program']
+        #print(event)
         tm_start = tm_parse(event['startTime'])
         tm_end = tm_parse(event['endTime'])
         prog_out = sub_el(out, 'programme',
@@ -221,8 +229,11 @@ def main():
         for f in event['filter']:
           sub_el(prog_out, 'genre', lang='en', text=f[7:])
 
-  out_path = pathlib.Path(__file__).parent.joinpath('xmltv.xml')
-  with open(out_path.absolute(), 'wb') as f:
+        content_thumb = "https://zap2it.tmsimg.com/assets/" + str(event['thumbnail']) + ".jpg?w=165"
+        sub_el(prog_out, 'icon', src=content_thumb)
+
+  out_path = "/var/www/html/" + str(base_qs["postalCode"])  + ".xml"
+  with open(out_path, 'wb') as f:
     f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write(ET.tostring(out, encoding='UTF-8'))
 
