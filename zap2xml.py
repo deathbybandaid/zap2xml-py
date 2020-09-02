@@ -216,44 +216,44 @@ def main():
                               stop=tm_end.strftime('%Y%m%d%H%M%S %z'),
                               channel=c_id)
 
-        if prog_in['title']:
-            sub_el(prog_out, 'title', lang='en', text=prog_in['title'])
+            if prog_in['title']:
+                sub_el(prog_out, 'title', lang='en', text=prog_in['title'])
 
-        if 'filter-movie' in event['filter'] and prog_in['releaseYear']:
-            sub_el(prog_out, 'sub-title', lang='en', text='Movie: ' + prog_in['releaseYear'])
-        elif prog_in['episodeTitle']:
-            sub_el(prog_out, 'sub-title', lang='en', text=prog_in['episodeTitle'])
+            if 'filter-movie' in event['filter'] and prog_in['releaseYear']:
+                sub_el(prog_out, 'sub-title', lang='en', text='Movie: ' + prog_in['releaseYear'])
+            elif prog_in['episodeTitle']:
+                sub_el(prog_out, 'sub-title', lang='en', text=prog_in['episodeTitle'])
 
-        if prog_in['shortDesc'] is None:
-            prog_in['shortDesc'] = "Unavailable"
-        sub_el(prog_out, 'desc', lang='en', text=prog_in['shortDesc'])
+            if prog_in['shortDesc'] is None:
+                prog_in['shortDesc'] = "Unavailable"
+            sub_el(prog_out, 'desc', lang='en', text=prog_in['shortDesc'])
 
-        sub_el(prog_out, 'length', units='minutes', text=event['duration'])
+            sub_el(prog_out, 'length', units='minutes', text=event['duration'])
 
-        for f in event['filter']:
-            sub_el(prog_out, 'category', lang='en', text=f.replace('filter-', ''))
-            sub_el(prog_out, 'genre', lang='en', text=f[7:])
+            for f in event['filter']:
+                sub_el(prog_out, 'category', lang='en', text=f.replace('filter-', ''))
+                sub_el(prog_out, 'genre', lang='en', text=f[7:])
 
-        if event["thumbnail"] is not None:
-            content_thumb = str("https://zap2it.tmsimg.com/assets/" + str(event['thumbnail']) + ".jpg")
-            sub_el(prog_out, 'icon', src=content_thumb)
+            if event["thumbnail"] is not None:
+                content_thumb = str("https://zap2it.tmsimg.com/assets/" + str(event['thumbnail']) + ".jpg")
+                sub_el(prog_out, 'icon', src=content_thumb)
 
-        if event['rating']:
-            r = ET.SubElement(prog_out, 'rating')
-            sub_el(r, 'value', text=event['rating'])
+            if event['rating']:
+                r = ET.SubElement(prog_out, 'rating')
+                sub_el(r, 'value', text=event['rating'])
 
-        if prog_in['season'] and prog_in['episode']:
-            s_ = int(prog_in['season'], 10)
-            e_ = int(prog_in['episode'], 10)
-            sub_el(prog_out, 'episode-num', system='common',
-                   text='S%02dE%02d' % (s_, e_))
-            sub_el(prog_out, 'episode-num', system='xmltv_ns',
-                   text='%d.%d.' % (int(s_)-1, int(e_)-1))
-            sub_el(prog_out, 'episode-num', system='SxxExx">S',
-                   text='S%02dE%02d' % (s_, e_))
+            if prog_in['season'] and prog_in['episode']:
+                s_ = int(prog_in['season'], 10)
+                e_ = int(prog_in['episode'], 10)
+                sub_el(prog_out, 'episode-num', system='common',
+                       text='S%02dE%02d' % (s_, e_))
+                sub_el(prog_out, 'episode-num', system='xmltv_ns',
+                       text='%d.%d.' % (int(s_)-1, int(e_)-1))
+                sub_el(prog_out, 'episode-num', system='SxxExx">S',
+                       text='S%02dE%02d' % (s_, e_))
 
-        if 'New' in event['flag'] and 'live' not in event['flag']:
-            sub_el(prog_out, 'new')
+            if 'New' in event['flag'] and 'live' not in event['flag']:
+                sub_el(prog_out, 'new')
 
     out_path = str(args.output_file)
     with open(out_path, 'wb') as f:
