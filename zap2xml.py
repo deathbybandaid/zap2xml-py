@@ -198,12 +198,12 @@ def main():
         for c_in in d['channels']:
             c_out = sub_el(out, 'channel',
                                 id='I%s.%s.zap2it.com' % (c_in['channelNo'], c_in['channelId']))
-        sub_el(c_out, 'display-name',
-                      text='%s %s' % (c_in['channelNo'], c_in['callSign']))
-        sub_el(c_out, 'display-name', text=c_in['channelNo'])
-        sub_el(c_out, 'display-name', text=c_in['callSign'])
-        channel_thumb = str(c_in['thumbnail']).replace("//", "").split("?")[0]
-        sub_el(c_out, 'icon', src=channel_thumb)
+            sub_el(c_out, 'display-name',
+                          text='%s %s' % (c_in['channelNo'], c_in['callSign']))
+            sub_el(c_out, 'display-name', text=c_in['channelNo'])
+            sub_el(c_out, 'display-name', text=c_in['callSign'])
+            channel_thumb = str(c_in['thumbnail']).replace("//", "").split("?")[0]
+            sub_el(c_out, 'icon', src=channel_thumb)
 
     for c in d['channels']:
         c_id = 'I%s.%s.zap2it.com' % (c['channelNo'], c['channelId'])
