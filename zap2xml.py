@@ -159,11 +159,27 @@ def main():
     i_dt = datetime.datetime.fromtimestamp(i_time)
     #print('Getting data for', i_dt.isoformat())
 
-    qs = base_qs.copy()
-    qs['lineupId'] = '%s-%s-DEFAULT' % (args.zap_country, args.zap_headendId)
-    qs['time'] = i_time
+     #build parameters for grid call
+    parameters = {
+                'aid': base_qs['aid'],
+                'country': base_qs['country'],
+                'device': base_qs['device'],
+                'headendId': base_qs['headendId'],
+                'isOverride': "true",
+                'languagecode': base_qs['languagecode'],
+                'pref': 'm,p',
+                'timespan': base_qs['timespan'],
+                'timezone': base_qs['timezone'],
+                'userId': base_qs['userId'],
+                'postalCode': base_qs['postalCode'],
+                'lineupId': '%s-%s-DEFAULT' % (base_qs['country'], base_qs['device']),
+                'time': i_time,
+                'Activity_ID': 1,
+                'FromPage': "TV%20Guide",
+                }
+
     url = 'https://tvlistings.zap2it.com/api/grid?'
-    url += urllib.parse.urlencode(qs)
+    url += urllib.parse.urlencode(parameters)
 
     result = get_cached(cache_dir, str(i_time), args.delay, url)
     d = json.loads(result)
