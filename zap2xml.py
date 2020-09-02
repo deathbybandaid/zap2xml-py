@@ -72,6 +72,9 @@ def get_args():
   parser.add_argument(
       '-z', '--zip', '--postal', dest='zap_postalCode', type=str, required=True,
       help='The zip/postal code identifying the listings to fetch.')
+  parser.add_argument(
+      '--output_file', dest='output_file', type=str, default=pathlib.Path(__file__).parent.joinpath('xmltv.xml'),
+      help='Output File parameter.  (?)')
   return parser.parse_args()
 
 def get_cached(cache_dir, cache_key, delay, url):
@@ -250,7 +253,7 @@ def main():
         content_thumb = content_thumb.split("png")[0] + "png"
         sub_el(prog_out, 'icon', src=content_thumb)
 
-  out_path = "/var/www/html/" + str(base_qs["postalCode"])  + ".xml"
+  out_path = str(args.output_file)
   with open(out_path, 'wb') as f:
     f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write(ET.tostring(out, encoding='UTF-8'))
