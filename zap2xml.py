@@ -151,7 +151,7 @@ def main():
   out.set('source-info-url', 'http://tvlistings.zap2it.com/')
   out.set('source-info-name', 'zap2it.com')
   out.set('generator-info-name', 'zap2xml.py')
-  out.set('generator-info-url', 'github.com/arantius/zap2xml-py')
+  out.set('generator-info-url', 'github.com/deathbybandaid/zap2xml-py')
 
   # Fetch data in `zap_timespan` chunks.
   for i in range(int(7 * 24 / args.zap_timespan)):
