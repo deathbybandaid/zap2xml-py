@@ -178,6 +178,7 @@ def main():
         sub_el(c_out, 'display-name', text=c_in['channelNo'])
         sub_el(c_out, 'display-name', text=c_in['callSign'])
         channel_thumb = str(c_in['thumbnail']).replace("//", "")
+        channel_thumb = channel_thumb.split("png")[0] + "png"
         sub_el(c_out, 'icon', src=channel_thumb)
 
     for c in d['channels']:
@@ -230,6 +231,7 @@ def main():
           sub_el(prog_out, 'genre', lang='en', text=f[7:])
 
         content_thumb = "https://zap2it.tmsimg.com/assets/" + str(event['thumbnail']) + ".jpg?w=165"
+        content_thumb = content_thumb.split("png")[0] + "png"
         sub_el(prog_out, 'icon', src=content_thumb)
 
   out_path = "/var/www/html/" + str(base_qs["postalCode"])  + ".xml"
